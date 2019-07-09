@@ -28,7 +28,6 @@ function shuffle(array) {
 
 }
 
-
 /*
  * set up the event listener for a card. If a card is clicked:
  *  - display the card's symbol (put this functionality in another function that you call from this one)
@@ -40,11 +39,11 @@ function shuffle(array) {
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
 
-let cards = document.querySelectorAll('.card');
-let movesSpan = document.querySelector('.moves');
-let starsEl = document.querySelector('.stars');
+const cards = document.querySelectorAll('.card');
+const movesSpan = document.querySelector('.moves');
+const starsEl = document.querySelector('.stars');
 
-// shuffle(cards)
+shuffle(cards)
 
 const decrementStarsLimit = FOUND = cards.length / 2
 const BEST_MOVES = 8
@@ -53,28 +52,25 @@ let score = 0
 let moves = 0
 let stars = starsEl.children.length
 let slot = 0
-
-console.log(stars)
+let timeout;
+let timer;
+let seconds = 0;
+let minutes = 0;
 
 initialise ()
 
-cards.forEach(card => {
-
-  card.addEventListener('click', cardClickEvent);
-
-});
-
-
 function cardClickEvent (e) {
 
-  let selected = e.target
+  flipUp(e.target)
 
-  flipUp(selected)
-
-  runCheck(selected)
+  runCheck(e.target)
 }
 
 function runCheck (selected) {
+
+  if (cardsToCompare.includes(selected)) {
+    return;
+  }
 
   cardsToCompare.push(selected)
   slot++
@@ -84,76 +80,161 @@ function runCheck (selected) {
   }
 
   if (compareCards()) {
-    persistMatches()
-    score ++
+    addSuccessAnimation();
+    persistMatches();
+    score ++;
 
     if (gameCompleted()) {
-      document.querySelector('.overlay').style.display = 'flex'
-      document.querySelector('.movesResult').innerText = moves
-      document.querySelector('.starsResult').innerText = stars
+      document.querySelector('.overlay').style.display = 'flex';
+      document.querySelector('.movesResult').innerText = moves;
+      document.querySelector('.starsResult').innerText = stars;
+      document.querySelector('.completed-time').innerText = `${minutes}:${seconds}`;
+
+      getLatestScore()
+
+      appendToLatestScore()
+
+      clearTimeout(timeout);
+
+      clearInterval(timer);
     }
 
-    reset()
+    reset();
   }
 
   if ((moves % BEST_MOVES === 0) && stars > 1) {
-    removeStar()
+    removeStar();
   }
 
-  let timeout = setTimeout(() => {
-    flipDown()
-    reset()
-  }, 500);
+  addErrorAnimation();
+
+  timeout = setTimeout(() => {
+    removeErrorAnimation();
+    flipDown();
+    reset();
+  }, 200);
 
 }
 
 function initialise () {
-  movesSpan.innerText = moves
+
+  // Adding event lick to cards
+  cards.forEach(card => {
+    card.addEventListener('click', cardClickEvent);
+  });
+
+  movesSpan.innerText = moves;
+  countdown();
 }
 
 function gameCompleted () {
   if (score === FOUND) {
-    return true
+    return true;
   }
 
-  return false
+  return false;
 }
 
 function persistMatches () {
   cardsToCompare.forEach((card) => {
-    card.removeEventListener('click', cardClickEvent)
-    card.classList.remove('open', 'show')
-    card.classList.add('match')
+    card.removeEventListener('click', cardClickEvent);
+    card.classList.remove('open', 'show');
+    card.classList.add('match');
   })
 }
 
 function flipUp (selected) {
-  selected.classList.add('open', 'show')
+  selected.classList.add('open', 'show');
 }
 
 function flipDown () {
   cardsToCompare.forEach((card) => {
-    card.classList.remove('open', 'show')
+    card.classList.remove('open', 'show');
   })
 }
 
 function compareCards () {
   moves++;
-  movesSpan.innerText = moves
+  movesSpan.innerText = moves;
 
-  return cardsToCompare[0].firstElementChild.classList.toString() === cardsToCompare[cardsToCompare.length - 1].firstElementChild.classList.toString()
+  return cardsToCompare[0].firstElementChild.classList.toString() === cardsToCompare[cardsToCompare.length - 1].firstElementChild.classList.toString();
 }
 
 function removeStar () {
-  starsEl.children[stars-1].firstElementChild.classList.add('fa-star-o')
-  stars--
+  starsEl.children[stars-1].firstElementChild.classList.add('fa-star-o');
+  stars--;
 }
 
 function reset () {
   slot = 0;
-  cardsToCompare.length = 0
+  cardsToCompare.length = 0;
 }
 
 function restartGame () {
-  window.location.reload()
+  window.location.reload();
+}
+
+function addErrorAnimation () {
+  cardsToCompare.forEach((card) => {
+    card.classList.add('animated', 'shake', 'fast', 'bg--danger');
+  });
+}
+
+function removeErrorAnimation () {
+  cardsToCompare.forEach((card) => {
+    card.classList.remove('animated', 'shake', 'fast', 'bg--danger');
+  });
+}
+
+function addSuccessAnimation () {
+  cardsToCompare.forEach((card) => {
+    card.classList.add('animated', 'rubberBand', 'fast');
+  });
+}
+
+function removeSuccessAnimation () {
+  cardsToCompare.forEach((card) => {
+    card.classList.remove('animated', 'rubberBand', 'fast');
+  })
+}
+
+// Timer can be found on: http://jsfiddle.net/fc37nckg/
+function countdown () {
+  let sec = 0;
+  timer = setInterval( () => {
+    seconds = pad(++sec % 60)
+    minutes = pad(parseInt(sec / 60, 10))
+    document.querySelector(".seconds").innerHTML = seconds;
+    document.querySelector(".minutes").innerHTML = minutes;
+  }, 1000);
+}
+
+function pad (val) {
+  return val > 9 ? val : "0" + val;
+}
+
+// Getting the latest score from localStorage
+function getLatestScore (argument) {
+  const leaderboardBody = document.querySelector('.leaderboard__body');
+  const tempEl = document.createDocumentFragment();
+
+  Object.keys(localStorage).forEach(function(key) {
+    const line = document.createElement('p')
+    const item = JSON.parse(localStorage.getItem(key));
+    line.innerHTML = `Start: ${item.stars} - Moves: ${item.moves} - Time: ${item.time}`;
+    tempEl.appendChild(line)
+  });
+
+  leaderboardBody.appendChild(tempEl)
+}
+
+// adding the current score to localStorage
+function appendToLatestScore (argument) {
+  localStorage.setItem(Date.now(), JSON.stringify(
+    {
+      'moves': moves,
+      'stars': stars,
+      'time': `${minutes}:${seconds}`,
+    }
+  ));
 }

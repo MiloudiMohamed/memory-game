@@ -154,3 +154,84 @@ h1 {
 .overlay__button:hover {
     background-color: #63b3ed;
 }
+
+.timeout {
+    display: inline;
+    margin-right: 2em;
+}
+
+.bg--danger {
+    background-color: #e53e3e!important;
+}
+
+/* Prevent firing the event when clicking the child icon */
+.inner-icon {
+    pointer-events: none;
+}
+
+.leaderboard {
+    margin-top: 2em;
+}
+
+.leaderboard__body {
+    height: 150px;
+    overflow-y: auto;
+}
+
+/* Adding media query */
+@media screen and (max-width: 640px) {
+    .deck {
+        width: 300px;
+        min-height: 350px;
+        margin: 2em 0 3em;
+    }
+
+    .deck .card {
+        height: 50px;
+        width: 50px;
+    }
+
+    .deck .card.show {
+        font-size: 16px;
+    }
+
+    .overlay__header {
+        font-size: 1em;
+    }
+
+    .overlay__content {
+        font-size: 0.8em;
+    }
+
+    .overlay__button {
+        padding: 0.75em 1em;
+        font-size: 0.75em;
+    }
+
+    .leaderboard {
+        font-size: 0.75em;
+    }
+
+    .score-panel {
+        text-align: left;
+        width: 250px;
+        margin-bottom: 10px;
+    }
+}
+
+@media screen and (min-width: 641px) and (max-width: 768px) {
+    .deck {
+        width: 450px;
+        min-height: 550px;
+        margin: 2em 0 3em;
+    }
+
+    .deck .card {
+        height: 80px;
+        width: 80px;
+    }
+
+    .deck .card.show {
+        font-size: 26px;
+    }
+}
