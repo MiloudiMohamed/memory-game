@@ -11,7 +11,7 @@
  */
 
 // Shuffle function from http://stackoverflow.com/a/2450976
-function shuffle(array) {
+function shuffle (array) {
 
     let currentIndex = array.length;
     const deck = document.querySelector('.deck')
@@ -56,6 +56,7 @@ let timeout;
 let timer;
 let seconds = 0;
 let minutes = 0;
+let startTimer = true;
 
 initialise ()
 
@@ -67,6 +68,11 @@ function cardClickEvent (e) {
 }
 
 function runCheck (selected) {
+
+  if (startTimer) {
+    countdown();
+    startTimer = false
+  }
 
   if (cardsToCompare.includes(selected)) {
     return;
@@ -124,7 +130,6 @@ function initialise () {
   });
 
   movesSpan.innerText = moves;
-  countdown();
 }
 
 function gameCompleted () {
